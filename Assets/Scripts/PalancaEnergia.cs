@@ -2,14 +2,23 @@ using UnityEngine;
 
 public class PalancaEnergia : MonoBehaviour
 {
-    public int vatiosQueAporta = 25; // Cuánta energía da esta palanca individual
+    public int vatiosQueAporta = 25;
     private bool estaActivada = false;
     private ControlNave manager;
 
+    [Header("Configuración de Animación")]
+    // Hacemos el Animator público por si el componente está en un objeto hijo
+    public Animator miAnimator;
+
     void Start()
     {
-        // Busca automáticamente el script principal en la escena
-        manager = Object.FindAnyObjectByType<ControlNave>();
+        manager = FindAnyObjectByType<ControlNave>();
+
+        // Si se te olvida arrastrarlo en el Inspector, el código intentará buscarlo solo
+        if (miAnimator == null)
+        {
+            miAnimator = GetComponent<Animator>();
+        }
     }
 
     public void AlternarPalanca()
@@ -19,14 +28,22 @@ public class PalancaEnergia : MonoBehaviour
         if (estaActivada)
         {
             manager.ModificarEnergia(vatiosQueAporta);
-            // OPCIONAL: Mover la palanca visualmente un poco hacia abajo
-            transform.Rotate(30, 0, 0);
+
+            // ¡NUEVO! Fuerza al Animator a reproducir el clip de activación
+            if (miAnimator != null)
+            {
+                miAnimator.Play("Lever_Activate");
+            }
         }
         else
         {
             manager.ModificarEnergia(-vatiosQueAporta);
-            // OPCIONAL: Regresar la palanca a su posición original
-            transform.Rotate(-30, 0, 0);
+
+            // ¡NUEVO! Regresa la palanca a su estado original (apagado)
+            if (miAnimator != null)
+            {
+                miAnimator.Play("Lever_Default");
+            }
         }
     }
 }
