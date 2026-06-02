@@ -1,45 +1,78 @@
 using UnityEngine;
-using UnityEngine.UI; // Necesario para interactuar con la interfaz
-using UnityEngine.SceneManagement; // Necesario para reiniciar si pierde
+using UnityEngine.UI;
+using UnityEngine.SceneManagement;
 
 public class ControlNave : MonoBehaviour
 {
     [Header("Configuración de Tiempo")]
-    public float tiempoRestante = 120f; // 2 minutos para escapar
-    public Text textoContador; // Arrastra aquí un texto de la UI para el reloj
+    public float tiempoRestante = 120f;
+    public Text textoContador;
 
     [Header("Puzle 1: Energía")]
     public int energiaActual = 0;
-    public int energiaObjetivo = 100; // El número exacto a conseguir
-    public Text textoEnergia; // Texto UI que muestra la energía actual
-    public GameObject panelVectoresUI; // Panel de UI del teclado numérico (empieza desactivado)
+    public int energiaObjetivo = 100;
+    public Text textoEnergia;
+    public GameObject panelVectoresUI;
+
+    [Header("Elemento Extra: Exploración")]
+    public bool tieneTarjetaCoordenadas = false;
+    public GameObject objetoTarjetaEnEscena; // La tarjeta 3D que el jugador debe buscar
+    public Text textoAvisoUI; // Un texto auxiliar para dar mensajes al jugador
 
     [Header("Puzle 2: Vectores")]
-    // Si la operación matemática da, por ejemplo, X=4, Y=7, Z=-2
     public int vectorCorrectoX = 4;
     public int vectorCorrectoY = 7;
     public int vectorCorrectoZ = -2;
-
-    // Campos de texto de la UI donde el jugador escribirá los números
     public InputField inputX;
     public InputField inputY;
     public InputField inputZ;
 
+    [Header("Paneles de Estado (UI)")]
+    public GameObject panelIntro;
+    public GameObject panelVictoria;
+    public GameObject panelDerrota;
+
+    [Header("Efectos de Sonido (SFX)")]
+    public AudioClip sonidoPalanca;
+    public AudioClip sonidoError;
+    public AudioClip sonidoEnergiaOk;
+    public AudioClip sonidoVictoria;
+
     private bool panelEnergiaResuelto = false;
+    private bool juegoActivo = false;
 
     void Start()
     {
-        panelVectoresUI.SetActive(false); // Ocultar el teclado de vectores al inicio
-        ActualizarUI();
+        panelVectoresUI.SetActive(false);
+        panelVictoria.SetActive(false);
+        panelDerrota.SetActive(false);
+        panelIntro.SetActive(true); // Empezamos con la intro narrativa
+        Time.timeScale = 0f; // Pausa el juego durante la intro
+        textoAvisoUI.text = "Busca la Tarjeta de Coordenadas y activa la energía.";
+    }
+
+    // Este método lo llamará el botón "ENTENDIDO" de tu panel de Intro
+    public void IniciarJuego()
+    {
+        panelIntro.SetActive(false);
+        Time.timeScale = 1f; // Reanuda el tiempo del juego
+        juegoActivo = true;
     }
 
     void Update()
     {
-        // Mecánica de cuenta regresiva (Condición de Derrota)
+        if (!juegoActivo) return;
+
         if (tiempoRestante > 0)
         {
             tiempoRestante -= Time.deltaTime;
             textoContador.text = "Soporte de Vida: " + Mathf.Ceil(tiempoRestante).ToString() + "s";
+
+            // Efecto visual: Si queda menos de 30s, el texto parpadea en rojo
+            if (tiempoRestante < 30f)
+            {
+                textoContador.color = Color.red;
+            }
         }
         else
         {
@@ -47,33 +80,47 @@ public class ControlNave : MonoBehaviour
         }
     }
 
-    // Lo llaman las palancas al ser pulsadas
     public void ModificarEnergia(int cantidad)
     {
-        if (panelEnergiaResuelto) return;
+        if (panelEnergiaResuelto || !juegoActivo) return;
 
         energiaActual += cantidad;
-        ActualizarUI();
+        textoEnergia.text = "Energía: " + energiaActual + " / " + energiaObjetivo + " W";
 
-        // Si llega exactamente a la energía requerida
+        // Reproduce el sonido de la palanca en la posición de la cámara
+        if (sonidoPalanca != null) AudioSource.PlayClipAtPoint(sonidoPalanca, Camera.main.transform.position);
+
         if (energiaActual == energiaObjetivo)
         {
             panelEnergiaResuelto = true;
             textoEnergia.text = "SISTEMA ENERGIZADO";
             textoEnergia.color = Color.green;
-            panelVectoresUI.SetActive(true); // Se enciende la pantalla de navegación
+
+            if (sonidoEnergiaOk != null) AudioSource.PlayClipAtPoint(sonidoEnergiaOk, Camera.main.transform.position);
+
+            panelVectoresUI.SetActive(true);
         }
     }
 
-    void ActualizarUI()
+    // El jugador usará el Raycast para hacer clic en la tarjeta 3D y llamará a esto
+    public void RecogerTarjeta()
     {
-        textoEnergia.text = "Energía: " + energiaActual + " / " + energiaObjetivo + " W";
+        tieneTarjetaCoordenadas = true;
+        objetoTarjetaEnEscena.SetActive(false); // Hace desaparecer la tarjeta del suelo/mesa
+        textoAvisoUI.text = "¡Tarjeta recogida! Introdúcela en el panel de navegación.";
+        if (sonidoPalanca != null) AudioSource.PlayClipAtPoint(sonidoPalanca, Camera.main.transform.position);
     }
 
-    // Botón en la UI llamará a esta función cuando el jugador presione "INGRESAR RUTA"
     public void ValidarVector()
     {
-        // Convertimos lo que escribió el usuario en números enteros
+        // Validación del elemento extra de exploración
+        if (!tieneTarjetaCoordenadas)
+        {
+            textoAvisoUI.text = "ERROR: Inserta la Tarjeta de Coordenadas primero.";
+            if (sonidoError != null) AudioSource.PlayClipAtPoint(sonidoError, Camera.main.transform.position);
+            return;
+        }
+
         int xIngresado = int.Parse(inputX.text);
         int yIngresado = int.Parse(inputY.text);
         int zIngresado = int.Parse(inputZ.text);
@@ -84,23 +131,34 @@ public class ControlNave : MonoBehaviour
         }
         else
         {
-            // Penalización por fallar la ruta matemática: pierde 20 segundos
-            tiempoRestante -= 20f;
-            Debug.Log("Coordenadas incorrectas. Rumbo fallido.");
+            tiempoRestante -= 20f; // Penalización
+            textoAvisoUI.text = "Coordenadas Incorrectas. Trayectoria Fallida.";
+            if (sonidoError != null) AudioSource.PlayClipAtPoint(sonidoError, Camera.main.transform.position);
         }
     }
 
     void Victory()
     {
-        Debug.Log("¡Ruta calculada con éxito! Saltando al hiperespacio de vuelta a la Tierra.");
-        // Aquí puedes cargar una escena que diga "Ganaste"
-        // SceneManager.LoadScene("EscenaVictoria");
+        juegoActivo = false;
+        Time.timeScale = 0f;
+        panelVictoria.SetActive(true);
+        if (sonidoVictoria != null) AudioSource.PlayClipAtPoint(sonidoVictoria, Camera.main.transform.position);
     }
 
     void Defeated()
     {
-        Debug.Log("Oxigeno agotado o sistema colapsado. Fin de la partida.");
-        // Reinicia la escena actual para volver a intentarlo
+        juegoActivo = false;
+        Time.timeScale = 0f;
+        panelDerrota.SetActive(true);
+    }
+
+    public void ReiniciarNivel()
+    {
         SceneManager.LoadScene(SceneManager.GetActiveScene().name);
+    }
+
+    public void IrAlMenu()
+    {
+        SceneManager.LoadScene("MenuPrincipal");
     }
 }
