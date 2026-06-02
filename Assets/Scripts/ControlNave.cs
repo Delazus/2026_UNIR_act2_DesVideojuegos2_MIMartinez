@@ -19,9 +19,9 @@ public class ControlNave : MonoBehaviour
     public int vectorCorrectoX = 4;
     public int vectorCorrectoY = 7;
     public int vectorCorrectoZ = -2;
-    public InputField inputX;
-    public InputField inputY;
-    public InputField inputZ;
+    public TMP_InputField inputX;
+    public TMP_InputField inputY;
+    public TMP_InputField inputZ;
     public TMP_Text textoAvisoUI; // Mensajes en pantalla (ej: "Coordenadas incorrectas")
 
     [Header("Paneles de Estado (UI)")]
@@ -98,6 +98,7 @@ public class ControlNave : MonoBehaviour
             textoEnergia.color = Color.green;
 
             panelVectoresUI.SetActive(true); // Se enciende la pantalla de navegación automáticamente
+            LiberarRaton(true);
         }
     }
 
@@ -160,6 +161,6 @@ public class ControlNave : MonoBehaviour
 
     public void IrAlMenu()
     {
-        SceneManager.LoadScene("MenuPrincipal");
+        SceneManager.LoadScene("GamePlay_VECTOR-3_Lvl0");
     }
 }
