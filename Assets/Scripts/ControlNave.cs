@@ -6,14 +6,14 @@ using TMPro;
 public class ControlNave : MonoBehaviour
 {
     [Header("Configuración de Tiempo")]
-    public float tiempoRestante = 120f; // 2 minutos de juego
+    public float tiempoRestante = 120f;
     public TMP_Text textoContador;
 
     [Header("Puzle 1: Energía")]
     public int energiaActual = 0;
-    public int energiaObjetivo = 100; // La meta exacta
+    public int energiaObjetivo = 100;
     public TMP_Text textoEnergia;
-    public GameObject panelVectoresUI; // El teclado numérico de la pantalla
+    public GameObject panelVectoresUI;
 
     [Header("Puzle 2: Vectores")]
     public int vectorCorrectoX = 4;
@@ -22,7 +22,7 @@ public class ControlNave : MonoBehaviour
     public TMP_InputField inputX;
     public TMP_InputField inputY;
     public TMP_InputField inputZ;
-    public TMP_Text textoAvisoUI; // Mensajes en pantalla (ej: "Coordenadas incorrectas")
+    public TMP_Text textoAvisoUI;
 
     [Header("Paneles de Estado (UI)")]
     public GameObject panelBackground;
@@ -30,59 +30,54 @@ public class ControlNave : MonoBehaviour
     public GameObject panelVictoria;
     public GameObject panelDerrota;
 
-    [Header("Control del Jugador y Ratón")]
-    public MonoBehaviour scriptMovimientoJugador; // Tu componente ThirdPersonController
+    [Header("Audio General")]
+    public AudioSource[] sonidosParaApagar;
 
-    private bool panelEnergiaResuelto = false;
+    [Header("Control del Jugador y Ratón")]
+    public MonoBehaviour scriptMovimientoJugador;
+
+    // Esta variable ahora es pública para que el Raycast sepa si la energía ya funciona
+    [HideInInspector] public bool panelEnergiaResuelto = false;
     private bool juegoActivo = false;
 
     void Start()
     {
-        // Estado inicial de las pantallas
         panelVectoresUI.SetActive(false);
         panelVictoria.SetActive(false);
         panelDerrota.SetActive(false);
         panelIntro.SetActive(true);
         panelBackground.SetActive(true);
-
-        Time.timeScale = 0f; // Pausa el juego en la intro narrativa
+        Time.timeScale = 0f;
         if (textoAvisoUI != null) textoAvisoUI.text = "";
 
-        LiberarRaton(true); // Libera el cursor para poder pulsar "Entendido"
+        LiberarRaton(true);
     }
 
     public void IniciarJuego()
     {
         panelIntro.SetActive(false);
         panelBackground.SetActive(false);
-        Time.timeScale = 1f; // Arranca el tiempo del juego
+        Time.timeScale = 1f;
         juegoActivo = true;
-
-        LiberarRaton(false); // Oculta el ratón para empezar a mover al personaje
+        LiberarRaton(false);
     }
 
     void Update()
     {
         if (!juegoActivo) return;
 
-        // Cuenta regresiva del soporte de vida
         if (tiempoRestante > 0)
         {
             tiempoRestante -= Time.deltaTime;
             textoContador.text = "Soporte de Vida: " + Mathf.Ceil(tiempoRestante).ToString() + "s";
-
-            if (tiempoRestante < 30f)
-            {
-                textoContador.color = Color.red; // Tensión visual al final
-            }
+            if (tiempoRestante < 30f) textoContador.color = Color.red;
         }
         else
         {
-            Defeated(); // Si el tiempo llega a 0, pierde
+            Defeated();
         }
     }
 
-    // Esta función la llaman las palancas automáticamente al interactuar
     public void ModificarEnergia(int cantidad)
     {
         if (panelEnergiaResuelto || !juegoActivo) return;
@@ -90,22 +85,38 @@ public class ControlNave : MonoBehaviour
         energiaActual += cantidad;
         textoEnergia.text = "Energía: " + energiaActual + " / " + energiaObjetivo + " W";
 
-        // Comprobación de la condición del primer puzle
         if (energiaActual == energiaObjetivo)
         {
             panelEnergiaResuelto = true;
             textoEnergia.text = "SISTEMA ENERGIZADO";
             textoEnergia.color = Color.green;
 
-            panelVectoresUI.SetActive(true); // Se enciende la pantalla de navegación automáticamente
-            LiberarRaton(true);
+            // Reemplazamos la activación directa por nuestra nueva función inteligente
+            AbrirPanelVectores();
         }
     }
 
-    // Esta función la llamará tu botón de la UI "INGRESAR RUTA"
+    // FUNCIONES DE CONTROL DE PANEL
+    public void AbrirPanelVectores()
+    {
+        if (!panelEnergiaResuelto || !juegoActivo) return;
+
+        panelVectoresUI.SetActive(true);
+        LiberarRaton(true); // Libera el ratón automáticamente para poder escribir las coordenadas
+    }
+
+    public void CerrarPanelVectores()
+    {
+        if (!juegoActivo) return;
+
+        panelVectoresUI.SetActive(false);
+        LiberarRaton(false); // Vuelve a ocultar el ratón para que puedas caminar y ver las pistas
+    }
+
+    // FUNCIONES VECTOR
+
     public void ValidarVector()
     {
-        // Convierte el texto que escribe el usuario en números
         int xIngresado = int.Parse(inputX.text);
         int yIngresado = int.Parse(inputY.text);
         int zIngresado = int.Parse(inputZ.text);
@@ -116,12 +127,11 @@ public class ControlNave : MonoBehaviour
         }
         else
         {
-            tiempoRestante -= 20f; // Penalización de tiempo por fallar la matemática
+            tiempoRestante -= 20f;
             if (textoAvisoUI != null) textoAvisoUI.text = "Ruta Errónea. Vector de trayectoria desviado.";
         }
     }
 
-    // Control del cursor y el script del personaje en los menús
     void LiberarRaton(bool liberar)
     {
         if (liberar)
@@ -144,6 +154,10 @@ public class ControlNave : MonoBehaviour
         Time.timeScale = 0f;
         panelVictoria.SetActive(true);
         LiberarRaton(true);
+        foreach (AudioSource sonido in sonidosParaApagar)
+        {
+            if (sonido != null) sonido.Stop();
+        }
     }
 
     void Defeated()
@@ -152,15 +166,12 @@ public class ControlNave : MonoBehaviour
         Time.timeScale = 0f;
         panelDerrota.SetActive(true);
         LiberarRaton(true);
+        foreach (AudioSource sonido in sonidosParaApagar)
+        {
+            if (sonido != null) sonido.Stop();
+        }
     }
 
-    public void ReiniciarNivel()
-    {
-        SceneManager.LoadScene(SceneManager.GetActiveScene().name);
-    }
-
-    public void IrAlMenu()
-    {
-        SceneManager.LoadScene("GamePlay_VECTOR-3_Lvl0");
-    }
+    public void ReiniciarNivel() { SceneManager.LoadScene(SceneManager.GetActiveScene().name); }
+    public void IrAlMenu() { SceneManager.LoadScene("MenuPrincipal"); }
 }

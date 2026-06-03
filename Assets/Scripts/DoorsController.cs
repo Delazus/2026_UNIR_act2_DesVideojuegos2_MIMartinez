@@ -15,7 +15,13 @@ public class DoorsController : MonoBehaviour
 
     [Header("Audio Settings")]
     [SerializeField] private AudioSource audioSource;
-    [SerializeField] private AudioClip openDoorSound;
+    [SerializeField] private AudioClip DoorSound;
+
+    [Header("Configuración de Escape Room")]
+    // ¡NUEVO! Si está en True, se abre sola. Si está en False, se queda bloqueada.
+    public bool puertaActiva = true;
+
+    public GameObject panelUiBloqueo;
 
     private void Start()
     {
@@ -23,14 +29,32 @@ public class DoorsController : MonoBehaviour
         targetLeftPosition = leftClosePosition;
 
         audioSource = GetComponent<AudioSource>();
+
+        if (panelUiBloqueo != null)
+        {
+            panelUiBloqueo.SetActive(false);
+        }
     }
 
 
     private void OnTriggerEnter(Collider other)
     {
-        if(other.CompareTag("Player"))
+        if (other.CompareTag("Player"))
         {
-            OpenDoor();
+            if (puertaActiva)
+            {
+                OpenDoor();
+            }
+            else
+            {
+                // BLOQUEADA: Enciende el panel visual en la pantalla
+                if (panelUiBloqueo != null)
+                {
+                    panelUiBloqueo.SetActive(true);
+                }
+
+                PlaySound(DoorSound);
+            }
         }
     }
 
@@ -38,7 +62,18 @@ public class DoorsController : MonoBehaviour
     {
         if (other.CompareTag("Player"))
         {
-            CloseDoor();
+            if (puertaActiva)
+            {
+                CloseDoor();
+            }
+            else
+            {
+                // AL ALEJARSE: Apaga el panel visual de la pantalla
+                if (panelUiBloqueo != null)
+                {
+                    panelUiBloqueo.SetActive(false);
+                }
+            }
         }
     }
 
@@ -54,7 +89,7 @@ public class DoorsController : MonoBehaviour
         targetRightPosition = rightOpenPosition;
         targetLeftPosition = leftOpenPosition;
 
-        PlaySound(openDoorSound);
+        PlaySound(DoorSound);
     }
 
     private void Update()

@@ -54,7 +54,7 @@ AnimatorState:
   m_TimeParameter: 
 --- !u!1107 &-2412878060426535946
 AnimatorStateMachine:
-  serializedVersion: 6
+  serializedVersion: 7
   m_ObjectHideFlags: 1
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
@@ -85,7 +85,7 @@ AnimatorStateMachine:
   m_EntryPosition: {x: 50, y: 120, z: 0}
   m_ExitPosition: {x: 60, y: 210, z: 0}
   m_ParentStateMachinePosition: {x: 800, y: 20, z: 0}
-  m_DefaultState: {fileID: 2690526982283255829}
+  m_DefaultState: {fileID: -8767870130591050118}
 --- !u!91 &9100000
 AnimatorController:
   m_ObjectHideFlags: 0
@@ -93,7 +93,7 @@ AnimatorController:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_Name: MainPanel
-  serializedVersion: 5
+  serializedVersion: 6
   m_AnimatorParameters:
   - m_Name: AnimSpeed
     m_Type: 1
@@ -114,6 +114,7 @@ AnimatorController:
     m_IKPass: 0
     m_SyncedLayerAffectsTiming: 0
     m_Controller: {fileID: 9100000}
+  m_EvaluateTransitionsOnStart: 0
 --- !u!1102 &442923263722277053
 AnimatorState:
   serializedVersion: 6

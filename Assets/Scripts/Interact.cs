@@ -1,53 +1,56 @@
 using UnityEngine;
-using UnityEngine.InputSystem; // Evita el error InvalidOperationException
+using UnityEngine.InputSystem;
 
-public class MecanicaRaycast : MonoBehaviour
+public class Interact : MonoBehaviour
 {
     public float distanciaInteraccion = 10f;
-    public float radioEsfera = 0.6f; // Tu margen de error cómodo para apuntar
-    public GameObject contenedorIndicadorUI; // Tu letrero negro con fondo de la tecla [E]
+    public float radioEsfera = 0.6f;
+    public GameObject contenedorIndicadorUI;
+
+    private ControlNave manager;
 
     void Start()
     {
-        if (contenedorIndicadorUI != null)
-        {
-            contenedorIndicadorUI.SetActive(false);
-        }
+        manager = FindAnyObjectByType<ControlNave>();
+        if (contenedorIndicadorUI != null) contenedorIndicadorUI.SetActive(false);
     }
 
     void Update()
     {
-        // Lanza un rayo grueso desde el centro de la pantalla hacia adelante
         Ray rayo = Camera.main.ViewportPointToRay(new Vector3(0.5f, 0.5f, 0f));
         RaycastHit hit;
 
-        bool mirandoPalanca = false;
+        bool mirandoInteractuable = false;
 
         if (Physics.SphereCast(rayo, radioEsfera, out hit, distanciaInteraccion))
         {
-            // Busca únicamente si el objeto es una palanca de energía
             PalancaEnergia palanca = hit.collider.GetComponent<PalancaEnergia>();
 
-            if (palanca != null)
+            // Detecta la consola principal por su Tag
+            bool esConsola = hit.collider.CompareTag("Consola");
+
+            // Se puede interactuar si es una palanca, o si es la consola Y la energía ya está lista
+            if (palanca != null || (esConsola && manager != null && manager.panelEnergiaResuelto))
             {
-                mirandoPalanca = true;
+                mirandoInteractuable = true;
 
-                // Enciende el letrero visual en la interfaz
-                if (contenedorIndicadorUI != null)
-                {
-                    contenedorIndicadorUI.SetActive(true);
-                }
+                if (contenedorIndicadorUI != null) contenedorIndicadorUI.SetActive(true);
 
-                // Detecta la tecla E usando el nuevo sistema de entradas
                 if (Keyboard.current != null && Keyboard.current.eKey.wasPressedThisFrame)
                 {
-                    palanca.AlternarPalanca(); // Acciona la palanca
+                    if (palanca != null)
+                    {
+                        palanca.AlternarPalanca();
+                    }
+                    else if (esConsola)
+                    {
+                        manager.AbrirPanelVectores();
+                    }
                 }
             }
         }
 
-        // Si la mirada sale de la palanca, apaga el cartel de la interfaz de inmediato
-        if (!mirandoPalanca && contenedorIndicadorUI != null)
+        if (!mirandoInteractuable && contenedorIndicadorUI != null)
         {
             contenedorIndicadorUI.SetActive(false);
         }
