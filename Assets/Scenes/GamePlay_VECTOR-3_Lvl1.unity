@@ -28032,6 +28032,7 @@ GameObject:
   - component: {fileID: 7018120648999277362}
   - component: {fileID: 3543048675876054462}
   - component: {fileID: 974238579235781070}
+  - component: {fileID: 7018120648999277363}
   m_Layer: 2
   m_Name: Robot_Soldier_Green
   m_TagString: Player
@@ -31972,6 +31973,82 @@ MonoBehaviour:
     m_Bits: 0
   canPush: 0
   strength: 1.1
+--- !u!114 &7018120648999277363
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 974238579235781058}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b2d8418b0b9634b1892b0268dd9c2743, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Unity.Animation.Rigging::UnityEngine.Animations.Rigging.BoneRenderer
+  boneShape: 1
+  drawBones: 1
+  drawTripods: 0
+  boneSize: 1
+  tripodSize: 1
+  boneColor: {r: 0, g: 0, b: 1, a: 0.5}
+  m_Transforms:
+  - {fileID: 4531053987528084}
+  - {fileID: 4729832513791050}
+  - {fileID: 4247202175078600}
+  - {fileID: 4306058774963428}
+  - {fileID: 4594922215692288}
+  - {fileID: 4936323846179304}
+  - {fileID: 4468050611629236}
+  - {fileID: 4959883541204116}
+  - {fileID: 4407145268389078}
+  - {fileID: 4350581745575308}
+  - {fileID: 4706911111963254}
+  - {fileID: 4782118620604938}
+  - {fileID: 4427499741147840}
+  - {fileID: 4248387453872972}
+  - {fileID: 4713690345265084}
+  - {fileID: 4655873826500900}
+  - {fileID: 4974226284493070}
+  - {fileID: 4631461905976060}
+  - {fileID: 4173222080103564}
+  - {fileID: 4711951787570106}
+  - {fileID: 4400766920605888}
+  - {fileID: 4963534350920164}
+  - {fileID: 4573292934712860}
+  - {fileID: 4395507719873048}
+  - {fileID: 4727296767410826}
+  - {fileID: 4601669153574122}
+  - {fileID: 4676506818083128}
+  - {fileID: 4079966864558074}
+  - {fileID: 4069026905200384}
+  - {fileID: 4532390382458784}
+  - {fileID: 4521110376755074}
+  - {fileID: 4122447997340680}
+  - {fileID: 4252047446501188}
+  - {fileID: 4492892340582698}
+  - {fileID: 4237849826034522}
+  - {fileID: 4513272438134960}
+  - {fileID: 4570747535956742}
+  - {fileID: 4599980327345140}
+  - {fileID: 4388308437232732}
+  - {fileID: 4053384286033832}
+  - {fileID: 4896216133415184}
+  - {fileID: 4084985490220872}
+  - {fileID: 4791563116817006}
+  - {fileID: 4273267037840658}
+  - {fileID: 4143871805680412}
+  - {fileID: 4980118312078622}
+  - {fileID: 4772018338145420}
+  - {fileID: 4421082144754032}
+  - {fileID: 4101306529248754}
+  - {fileID: 4246694183990846}
+  - {fileID: 4864097154908616}
+  - {fileID: 4196364026068538}
+  - {fileID: 4512599267166830}
+  - {fileID: 4187689914265480}
+  - {fileID: 4898452300390168}
+  - {fileID: 4520055197112724}
+  - {fileID: 4333400760549760}
 --- !u!114 &7077041018960249955
 MonoBehaviour:
   m_ObjectHideFlags: 0
